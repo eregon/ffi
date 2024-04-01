@@ -30,15 +30,15 @@ describe "String tests" do
   end
 
   it "A String passed to a :pointer argument mutated from C does not reflect the changes back to Ruby" do
-    s = -"hello"
+    s = -("hello" + "a" * 100)
     StrTestLibC.strtok(s, "e")
-    expect(s).to eq("hel" + "lo")
+    expect(s).to eq("hello" + "a" * 100)
   end
 
   it "A String passed to a :string argument mutated from C (incorrectly) does not reflect the changes back to Ruby" do
-    s = -"hello"
+    s = -("hello" + "a" * 100)
     StrTestLibC.strtok_string(s, "e")
-    expect(s).to eq("hel" + "lo")
+    expect(s).to eq("hello" + "a" * 100)
   end
 
   it "Poison null byte raises error" do
