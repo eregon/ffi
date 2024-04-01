@@ -14,6 +14,12 @@ describe "String tests" do
     attach_function :string_dummy, [ :string ], :void
     attach_function :string_null, [ ], :string
   end
+  module StrTestLibC
+    extend FFI::Library
+    ffi_lib 'c'
+    attach_function :strtok, [ :pointer, :string ], :pointer
+    attach_function :strtok_string, :strtok, [ :string, :string ], :pointer
+  end
 
   it "A String can be passed to a :pointer argument" do
     str = "string buffer"
@@ -21,6 +27,18 @@ describe "String tests" do
     expect(StrLibTest.pointer_buffer_equals(str + "a", str + "a", str.bytesize + 1)).to eq(1)
     expect(StrLibTest.pointer_buffer_equals(str + "\0", str, str.bytesize + 1)).to eq(1)
     expect(StrLibTest.pointer_buffer_equals(str + "a", str + "b", str.bytesize + 1)).to eq(0)
+  end
+
+  it "A String passed to a :pointer argument mutated from C does not reflect the changes back to Ruby" do
+    s = -"hello"
+    StrTestLibC.strtok(s, "e")
+    expect(s).to eq("hel" + "lo")
+  end
+
+  it "A String passed to a :string argument mutated from C (incorrectly) does not reflect the changes back to Ruby" do
+    s = -"hello"
+    StrTestLibC.strtok_string(s, "e")
+    expect(s).to eq("hel" + "lo")
   end
 
   it "Poison null byte raises error" do

@@ -294,7 +294,8 @@ rbffi_SetupCallParams(int argc, VALUE* argv, int paramCount, Type** paramTypes,
                     param->ptr = NULL;
 
                 } else {
-                    param->ptr = StringValueCStr(argv[argidx]);
+                    VALUE copy = rb_str_dup(argv[argidx]); // TODO: make it GC-safe
+                    param->ptr = StringValueCStr(copy);
                 }
 
                 ADJ(param, ADDRESS);
@@ -440,8 +441,10 @@ getPointer(VALUE value, int type)
         return memory != NULL ? memory->address : NULL;
 
     } else if (type == T_STRING) {
-
-        return StringValuePtr(value);
+        VALUE copy = rb_str_dup(value); // TODO: make it GC-safe
+        //rb_str_modify(copy);
+        //printf("str: %s\n", StringValuePtr(copy));
+        return StringValuePtr(copy);
 
     } else if (type == T_NIL) {
 
